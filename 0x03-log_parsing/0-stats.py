@@ -1,90 +1,62 @@
 #!/usr/bin/python3
 """
-This script reads lines from standard input and computes metrics based on the
-log format provided. It tracks the total file size and counts occurrences of
-specific HTTP status codes. Statistics are printed every 10 lines and on
-keyboard interruption (CTRL + C).
+A script that reads stdin line by line and computes metrics.
 
-Input Format:
+It processes lines in the format:
 <IP Address> - [<date>] "GET /projects/260 HTTP/1.1" <status code> <file size>
 If the format does not match, the line is skipped.
 
-Output Format:
-After every 10 lines and/or upon interruption:
-    - Total file size: sum of all <file size> values processed
-    - Number of lines by status code (200, 301, 400, 401, 403, 404, 405, 500)
+The script computes:
+- Total file size: Sum of all <file size> values
+- Number of occurrences of each valid status code: 200, 301, 400, 401, 403, 404, 405, 500
+
+Statistics are printed after every 10 lines and upon a keyboard interruption (CTRL + C).
 """
 
 import sys
-import signal
 
-# Initialize counters
+# Initialize total file size and status codes dictionary
 total_file_size = 0
-status_code_counts = {
-    200: 0,
-    301: 0,
-    400: 0,
-    401: 0,
-    403: 0,
-    404: 0,
-    405: 0,
-    500: 0
-}
+status_codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+valid_codes = set(status_codes.keys())
 line_count = 0
 
-
 def print_stats():
-    """Print the current statistics."""
-    print("File size:", total_file_size)
-    for code in sorted(status_code_counts.keys()):
-        if status_code_counts[code] > 0:
-            print(f"{code}: {status_code_counts[code]}")
+    """
+    Prints the accumulated statistics of file size and status codes.
+    Only status codes with a count greater than zero are displayed.
+    """
+    print("File size: {}".format(total_file_size))
+    for code in sorted(status_codes.keys()):
+        if status_codes[code] > 0:
+            print("{}: {}".format(code, status_codes[code]))
 
-
-def process_line(line):
-    """Process a single line of log data."""
-    global total_file_size, line_count
-    try:
+try:
+    for line in sys.stdin:
         parts = line.split()
-        # Validate line structure to match the expected format
-        if len(parts) < 9 or parts[5] != '"GET' or parts[6] != '/projects/260' or parts[7] != 'HTTP/1.1"':
-            return  # Skip lines that do not match the required format
+        if len(parts) < 7:
+            continue
 
-        # Extract status code and file size
-        status_code = int(parts[-2])
-        file_size = int(parts[-1])
+        # Extract and validate the file size and status code
+        try:
+            file_size = int(parts[-1])
+            status_code = int(parts[-2])
+        except ValueError:
+            continue
 
-        # Update metrics
+        # Update total file size and status code count if valid
         total_file_size += file_size
-        if status_code in status_code_counts:
-            status_code_counts[status_code] += 1
+        if status_code in valid_codes:
+            status_codes[status_code] += 1
+
         line_count += 1
 
         # Print stats every 10 lines
         if line_count % 10 == 0:
             print_stats()
 
-    except (ValueError, IndexError):
-        pass  # Ignore lines with parsing errors
-
-
-def signal_handler(sig, frame):
-    """Handle keyboard interruption (CTRL + C)."""
-    print_stats()
-    sys.exit(0)
-
-
-# Register signal handler for CTRL + C
-signal.signal(signal.SIGINT, signal_handler)
-
-# Read from stdin line by line
-try:
-    for line in sys.stdin:
-        process_line(line)
 except KeyboardInterrupt:
     print_stats()
-    sys.exit(0)
-
-# Print final stats if end of file is reached without interruption
-if line_count % 10 != 0:
+    raise
+finally:
     print_stats()
