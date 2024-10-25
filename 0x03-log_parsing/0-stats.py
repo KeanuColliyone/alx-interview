@@ -21,7 +21,14 @@ import signal
 # Initialize counters
 total_file_size = 0
 status_code_counts = {
-    200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0
+    200: 0,
+    301: 0,
+    400: 0,
+    401: 0,
+    403: 0,
+    404: 0,
+    405: 0,
+    500: 0
 }
 line_count = 0
 
@@ -39,7 +46,7 @@ def process_line(line):
     global total_file_size, line_count
     try:
         parts = line.split()
-        if len(parts) < 7:
+        if len(parts) < 7 or parts[5] != '"GET' or parts[6] != '/projects/260' or parts[7] != 'HTTP/1.1"':
             return  # Skip lines with an incorrect format
 
         # Extract status code and file size
@@ -72,3 +79,6 @@ signal.signal(signal.SIGINT, signal_handler)
 # Read from stdin line by line
 for line in sys.stdin:
     process_line(line)
+
+# Print final stats if end of file is reached
+print_stats()
