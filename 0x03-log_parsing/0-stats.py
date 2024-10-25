@@ -14,18 +14,12 @@ Statistics are printed after every 10 lines and upon a keyboard interruption (CT
 """
 
 import sys
-import re
 
 # Initialize total file size and status codes dictionary
 total_file_size = 0
 status_codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
 valid_codes = set(status_codes.keys())
 line_count = 0
-
-# Define regex pattern to validate format
-log_pattern = re.compile(
-    r'^\S+ - \[\S+ \S+\] "GET /projects/260 HTTP/1.1" (\d{3}) (\d+)$'
-)
 
 def print_stats():
     """
@@ -39,13 +33,21 @@ def print_stats():
 
 try:
     for line in sys.stdin:
-        match = log_pattern.match(line)
-        if not match:
+        # Split line into parts and validate structure
+        parts = line.split()
+        if len(parts) != 9:
             continue
 
-        # Extract status code and file size from matched groups
-        status_code = int(match.group(1))
-        file_size = int(match.group(2))
+        # Check if the request method and path match the exact required format
+        if parts[5] != '"GET' or parts[6] != '/projects/260' or parts[7] != 'HTTP/1.1"':
+            continue
+
+        # Extract status code and file size and validate as integers
+        try:
+            status_code = int(parts[-2])
+            file_size = int(parts[-1])
+        except ValueError:
+            continue
 
         # Update total file size and status code count if valid
         total_file_size += file_size
