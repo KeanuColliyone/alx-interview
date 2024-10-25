@@ -8,18 +8,27 @@ If the format does not match, the line is skipped.
 
 The script computes:
 - Total file size: Sum of all <file size> values
-- Number of occurrences of each valid status code: 200, 301, 400, 401, 403, 404, 405, 500
+- Number of occurrences of each valid status code:
+200, 301, 400, 401, 403, 404, 405, 500
 
-Statistics are printed after every 10 lines and upon a keyboard interruption (CTRL + C).
+Statistics are printed after every 10 lines and upon a keyboard interruption
+(CTRL + C).
 """
 
 import sys
+import re
 
 # Initialize total file size and status codes dictionary
 total_file_size = 0
 status_codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
 valid_codes = set(status_codes.keys())
 line_count = 0
+
+# Define regex pattern to validate format
+log_pattern = re.compile(
+    r'^\S+ - \[\S+ \S+\] "GET /projects/260 HTTP/1.1" (\d{3}) (\d+)$'
+)
+
 
 def print_stats():
     """
@@ -31,23 +40,16 @@ def print_stats():
         if status_codes[code] > 0:
             print("{}: {}".format(code, status_codes[code]))
 
+
 try:
     for line in sys.stdin:
-        # Split line into parts and validate structure
-        parts = line.split()
-        if len(parts) != 9:
+        match = log_pattern.match(line)
+        if not match:
             continue
 
-        # Check if the request method and path match the exact required format
-        if parts[5] != '"GET' or parts[6] != '/projects/260' or parts[7] != 'HTTP/1.1"':
-            continue
-
-        # Extract status code and file size and validate as integers
-        try:
-            status_code = int(parts[-2])
-            file_size = int(parts[-1])
-        except ValueError:
-            continue
+        # Extract status code and file size from matched groups
+        status_code = int(match.group(1))
+        file_size = int(match.group(2))
 
         # Update total file size and status code count if valid
         total_file_size += file_size
