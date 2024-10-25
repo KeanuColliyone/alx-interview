@@ -36,9 +36,9 @@ line_count = 0
 def print_stats():
     """Print the current statistics."""
     print("File size:", total_file_size)
-    for code in sorted(status_code_counts):
+    for code in sorted(status_code_counts.keys()):
         if status_code_counts[code] > 0:
-            print("{}: {}".format(code, status_code_counts[code]))
+            print(f"{code}: {status_code_counts[code]}")
 
 
 def process_line(line):
@@ -46,8 +46,9 @@ def process_line(line):
     global total_file_size, line_count
     try:
         parts = line.split()
-        if len(parts) < 7 or parts[5] != '"GET' or parts[6] != '/projects/260' or parts[7] != 'HTTP/1.1"':
-            return  # Skip lines with an incorrect format
+        # Validate line structure to match the expected format
+        if len(parts) < 9 or parts[5] != '"GET' or parts[6] != '/projects/260' or parts[7] != 'HTTP/1.1"':
+            return  # Skip lines that do not match the required format
 
         # Extract status code and file size
         status_code = int(parts[-2])
@@ -77,8 +78,13 @@ def signal_handler(sig, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 # Read from stdin line by line
-for line in sys.stdin:
-    process_line(line)
+try:
+    for line in sys.stdin:
+        process_line(line)
+except KeyboardInterrupt:
+    print_stats()
+    sys.exit(0)
 
-# Print final stats if end of file is reached
-print_stats()
+# Print final stats if end of file is reached without interruption
+if line_count % 10 != 0:
+    print_stats()
