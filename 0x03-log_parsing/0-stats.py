@@ -21,7 +21,6 @@ import re
 # Initialize total file size and status codes dictionary
 total_file_size = 0
 status_codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
-valid_codes = set(status_codes.keys())
 line_count = 0
 
 # Define regex pattern to validate format
@@ -53,7 +52,7 @@ try:
 
         # Update total file size and status code count if valid
         total_file_size += file_size
-        if status_code in valid_codes:
+        if status_code in status_codes:
             status_codes[status_code] += 1
 
         line_count += 1
