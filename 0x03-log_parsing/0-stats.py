@@ -1,4 +1,20 @@
 #!/usr/bin/python3
+"""
+This script reads lines from standard input and computes metrics based on the
+log format provided. It tracks the total file size and counts occurrences of
+specific HTTP status codes. Statistics are printed every 10 lines and on
+keyboard interruption (CTRL + C).
+
+Input Format:
+<IP Address> - [<date>] "GET /projects/260 HTTP/1.1" <status code> <file size>
+If the format does not match, the line is skipped.
+
+Output Format:
+After every 10 lines and/or upon interruption:
+    - Total file size: sum of all <file size> values processed
+    - Number of lines by status code (200, 301, 400, 401, 403, 404, 405, 500)
+"""
+
 import sys
 import signal
 
