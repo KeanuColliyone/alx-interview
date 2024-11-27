@@ -13,15 +13,12 @@ def makeChange(coins, total):
     if total <= 0:
         return 0
 
-    # Sort coins in descending order
-    coins.sort(reverse=True)
+    # Initialize dp array
+    dp = [float('inf')] * (total + 1)
+    dp[0] = 0  # Base case: 0 coins needed for total 0
 
-    count = 0
     for coin in coins:
-        if total == 0:
-            break
-        # Use as many coins of the current denomination as possible
-        count += total // coin
-        total %= coin
+        for j in range(coin, total + 1):
+            dp[j] = min(dp[j], dp[j - coin] + 1)
 
-    return count if total == 0 else -1
+    return dp[total] if dp[total] != float('inf') else -1
