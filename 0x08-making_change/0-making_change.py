@@ -18,22 +18,22 @@ def makeChange(coins, total):
     Returns:
         int: Fewest number of coins needed, or -1 if total cannot be met.
     """
-    # Edge case: Total is 0 or less
+    # Edge case: If total is 0 or less, return 0
     if total <= 0:
         return 0
 
-    # Edge case: No coins provided
+    # Edge case: If no coins are provided, return -1
     if not coins:
         return -1
 
-    # Initialize dp array
+    # Initialize dp array: dp[i] represents the fewest coins to make total i
     dp = [float('inf')] * (total + 1)
-    dp[0] = 0  # Base case: 0 coins needed for total 0
+    dp[0] = 0  # Base case: 0 coins are needed to make total 0
 
-    # Populate dp array
+    # Update dp array for each coin
     for coin in coins:
-        for j in range(coin, total + 1):
-            dp[j] = min(dp[j], dp[j - coin] + 1)
+        for i in range(coin, total + 1):
+            dp[i] = min(dp[i], dp[i - coin] + 1)
 
-    # Return result
+    # If dp[total] is still inf, it means the total cannot be met
     return dp[total] if dp[total] != float('inf') else -1
