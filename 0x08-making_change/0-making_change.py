@@ -6,6 +6,7 @@ Functions:
     makeChange(coins, total): Returns the fewest number of coins needed or -1.
 """
 
+
 def makeChange(coins, total):
     """
     Determine the fewest number of coins needed to meet a given amount total.
@@ -36,4 +37,3 @@ def makeChange(coins, total):
 
     # Return result
     return dp[total] if dp[total] != float('inf') else -1
-
