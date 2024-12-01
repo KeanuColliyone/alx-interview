@@ -1,5 +1,14 @@
 #!/usr/bin/python3
+"""
+Module to determine the fewest number of coins needed to meet a given total.
+
+Functions:
+    makeChange(coins, total): Returns the fewest number of coins needed or -1.
+"""
+
+
 from functools import lru_cache
+
 
 def makeChange(coins, total):
     """
