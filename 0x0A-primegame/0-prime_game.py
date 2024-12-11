@@ -1,3 +1,14 @@
+#!/usr/bin/python3
+
+"""
+This script contains the implementation of the prime number game.
+Functions:
+- isWinner(x, nums): Determines the winner of the game based on optimal moves.
+- sieve(n): Generates a list of prime numbers up to a given number using
+the Sieve of Eratosthenes.
+"""
+
+
 def isWinner(x, nums):
     """
     Determine the winner of the prime number game.
@@ -10,10 +21,12 @@ def isWinner(x, nums):
         return None
 
     def sieve(n):
-        """Generate prime numbers up to n using the Sieve of Eratosthenes."""
+        """
+        Generate prime numbers up to n using the Sieve of Eratosthenes.
+        """
         primes = [True] * (n + 1)
         primes[0] = primes[1] = False  # 0 and 1 are not prime
-        for i in range(2, int(n**0.5) + 1):
+        for i in range(2, int(n ** 0.5) + 1):
             if primes[i]:
                 for j in range(i * i, n + 1, i):
                     primes[j] = False
